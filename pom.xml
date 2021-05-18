@@ -13,10 +13,14 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>mssc-config-server</name>
     <description>Spring Cloud Config server for brewery project for course</description>
+
     <properties>
         <java.version>11</java.version>
         <spring-cloud.version>Hoxton.SR4</spring-cloud.version>
+        <docker.image.prefix>sfgbeerworks</docker.image.prefix>
+        <docker.image.name>${project.artifactId}</docker.image.name>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -64,12 +68,41 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                        <includeLayerTools>true</includeLayerTools>
+                    </layers>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.33.0</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <images>
+                        <image>
+                            <name>${docker.image.prefix}/${docker.image.name}</name>
+                            <alias>${project.artifactId}</alias>
+                            <build>
+                                <!--copies artifact to docker build dir in target-->
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                                <dockerFile>Dockerfile</dockerFile>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>
